@@ -1,3 +1,4 @@
+// UserList.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AddUserForm from '../AddUser/AddUserForm';
@@ -41,13 +42,23 @@ const UserList = () => {
     return Math.max(...ids) + 1;
   };
 
-  const addUser = newUser => {
-    const updatedUser = { ...newUser, id: getNextUserId() };
-    setUsers([...users, updatedUser]);
+  const addUser = async newUser => {
+    try {
+      const response = await axios.post('https://jsonplaceholder.typicode.com/users', newUser);
+      setUsers([...users, { ...response.data, department: newUser.department }]);
+      setShowAddForm(false);
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
-  const deleteUser = id => {
-    setUsers(users.filter(user => user.id !== id));
+  const deleteUser = async id => {
+    try {
+      await axios.delete(`https://jsonplaceholder.typicode.com/users/${id}`);
+      setUsers(users.filter(user => user.id !== id));
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   const updateUser = (id, updatedUser) => {
